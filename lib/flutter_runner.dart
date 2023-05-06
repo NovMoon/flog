@@ -26,7 +26,7 @@ class FlutterRunner {
       var a = 0;
       Future.doWhile(() async {
         if (a % 2 == 0) {
-          Printer().print('FlutterRunner: abcde');
+          Printer().print('FlutterRunner: abcde ');
         } else if (a % 3 == 0) {
           Printer().print('FlutterRunner: 12345');
         } else {
