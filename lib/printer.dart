@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:ansicolor/ansicolor.dart';
+import 'package:cli_tools/cli_tools.dart';
 import 'package:frun/print_filters/env_filter.dart';
+import 'package:frun/print_filters/error_filter.dart';
 import 'package:frun/print_filters/exclude_filter.dart';
 import 'package:frun/print_filters/filter.dart';
+import 'package:frun/print_filters/flutter_main_log_filter.dart';
 import 'package:frun/print_filters/search_filter.dart';
 
 import 'flutter_runner.dart';
@@ -15,6 +17,8 @@ class Printer {
     stdin.lineMode = false;
     stdin.echoMode = false;
     _filters.add(EnvFilter(_filters));
+    _filters.add(FlutterMainLogFilter());
+    _filters.add(AnyErrorFilter());
     _filters.add(ExcludeFilter());
     _filters.add(SearchFilter());
   }
@@ -34,14 +38,27 @@ class Printer {
 
   CommandFilter? _command;
 
+  bool accessCmd = true;
+
+  bool isBuilding = true;
+
   Future<void> start() async {
     initConfig();
+    // 10、13 回车
+    // 127 删除
+    // 27 ESC
     final keys = [10, 13, 27, 127];
-    _sub = stdin.transform(utf8.decoder).listen((event) {
+    _sub = keystrokes.listen((event) {
+      if (lockInput || isBuilding || !accessCmd) {
+        return;
+      }
       final code = event.codeUnitAt(0);
+      // 32 是空格，小于32的都是特殊字符
       if (!keys.contains(code) && code < 32) {
         return;
       }
+
+      // ! 如果是删除键
       if (code == 127) {
         _deleteAll();
         if (_command != null) {
@@ -52,9 +69,9 @@ class Printer {
       }
 
       if (_command == null && FlutterRunner().input(event)) {
-        stdout.write(event);
         return;
       }
+      // ! 如果是回车
       if (code == 10 || code == 13) {
         _command?.run();
         _command = null;
@@ -94,20 +111,29 @@ class Printer {
       if (result == null) {
         return;
       }
+
       message = result;
+
+      if(filter is ErrorFilter) {
+        break;
+      }
     }
     if (_command != null) {
       _deleteAll();
     }
-    stdout.writeln(message);
+    stdout.write(message);
     if (_command != null) {
       stdout.write(_command!.cache);
     }
   }
 
-  void stop() {
+  void stop([String? message]) {
     _sub?.cancel();
     _sub = null;
+    if(message != null) {
+      stdout.writeln(message);
+    }
+    FlutterRunner().stop();
   }
 
   void initConfig() {
@@ -118,7 +144,7 @@ class Printer {
       throw Exception('Failed to determine user home directory.');
     }
 
-    final dir = '$homeDir/.frun';
+    final dir = '$homeDir/.flog';
 
     logFile = File('$dir/log/${DateTime.now().millisecondsSinceEpoch}.txt');
     if (!logFile!.existsSync()) {
@@ -130,7 +156,10 @@ class Printer {
 
     if (!file.existsSync()) {
       file.createSync(recursive: true);
-      final str = JsonEncoder().convert({for (var e in _filters) ...e.getDefaultConfig()});
+      final str = JsonEncoder.withIndent('  ').convert({
+        ...FlutterRunner().getDefaultConfig(),
+        for (var e in _filters) ...e.getDefaultConfig(),
+      });
       file.writeAsStringSync(str);
     }
 
@@ -140,6 +169,7 @@ class Printer {
       for (var e in _filters) {
         e.initConfig(json);
       }
+      FlutterRunner().initConfig(json);
     }
 
     EnvFilter().printCurrent();

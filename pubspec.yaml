@@ -13,3 +13,5 @@ dev_dependencies:
 dependencies:
   ansicolor: ^2.0.1
   args: ^2.4.0
+  cli_tools:
+    path: ../cli-tools
