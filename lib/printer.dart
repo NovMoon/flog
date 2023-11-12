@@ -7,7 +7,7 @@ import 'package:frun/print_filters/env_filter.dart';
 import 'package:frun/print_filters/error_filter.dart';
 import 'package:frun/print_filters/exclude_filter.dart';
 import 'package:frun/print_filters/filter.dart';
-import 'package:frun/print_filters/flutter_main_log_filter.dart';
+import 'package:frun/print_filters/flutter_build_filter.dart';
 import 'package:frun/print_filters/search_filter.dart';
 
 import 'flutter_runner.dart';
@@ -17,7 +17,7 @@ class Printer {
     stdin.lineMode = false;
     stdin.echoMode = false;
     _filters.add(EnvFilter(_filters));
-    _filters.add(FlutterMainLogFilter());
+    _filters.add(FlutterBuildFilter());
     _filters.add(AnyErrorFilter());
     _filters.add(ExcludeFilter());
     _filters.add(SearchFilter());

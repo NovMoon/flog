@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cli_tools/cli_tools.dart';
 import 'package:frun/printer.dart';
@@ -20,6 +19,8 @@ class FlutterRunner {
   }
 
   static FlutterRunner? _instance;
+
+  final List<Callback> mainStartCallbacks = [];
 
   final List<StreamSubscription?> _subs = [];
   final List<Process?> _process = [];
@@ -57,6 +58,11 @@ class FlutterRunner {
   }
 
   Future<void> startMainProcess() async {
+
+    for (var value in mainStartCallbacks) {
+      value();
+    }
+
     final cmds = <String>[defaultCmd!, ...(defaultCmdArgs??[])];
 
     _mainProcess =  await cmds.startAsCmd(out: Printer().print, err: Printer().print);
@@ -67,6 +73,11 @@ class FlutterRunner {
       needRestart = false;
       await startMainProcess();
     }
+  }
+
+  void restart() {
+    needRestart = true;
+    _mainProcess?.kill();
   }
 
   Future<Process> _run(String cmd, List<String>? args) async {
@@ -126,6 +137,10 @@ class FlutterRunner {
         'args': ['run', '--dart-define=SELECT_ENV=true'],
       },
     };
+  }
+
+  void addOnMainStartCallback(Callback callback) {
+    mainStartCallbacks.add(callback);
   }
 
   void _testMode() {

@@ -1,21 +1,26 @@
-import 'dart:io';
-
-import 'package:ansicolor/ansicolor.dart';
+import 'package:cli_tools/cli_tools.dart';
 import 'package:frun/print_filters/filter.dart';
 
 abstract class ErrorFilter extends Filter {
-  AnsiPen pen = AnsiPen()..red(bold: true);
+  List<String>? get keys;
+  RegExp? get regex;
 
-  List<String> get keys;
+  @override
+  String? filter(String message) {
+    return message.removeColor().cRed();
+  }
 
   @override
   bool isFilter(String message) {
-    for (var value in keys) {
-      if (message.contains(value)) {
-        return true;
+    if(keys != null) {
+      for (var value in keys!) {
+        if (message.contains(value)) {
+          return true;
+        }
       }
     }
-    return false;
+
+    return regex?.hasMatch(message) ?? false;
   }
 }
 
@@ -23,9 +28,8 @@ abstract class ErrorFilter extends Filter {
 class AnyErrorFilter extends ErrorFilter {
 
   @override
-  String? filter(String message) {
-    return pen(message);
-  }
+  final RegExp regex = RegExp(r"#\d\s{6}");
+
   @override
   List<String> get keys => [
     'Error:'
