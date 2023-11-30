@@ -8,6 +8,7 @@ import 'package:frun/print_filters/error_filter.dart';
 import 'package:frun/print_filters/exclude_filter.dart';
 import 'package:frun/print_filters/filter.dart';
 import 'package:frun/print_filters/flutter_build_filter.dart';
+import 'package:frun/print_filters/normal_filter.dart';
 import 'package:frun/print_filters/search_filter.dart';
 
 import 'flutter_runner.dart';
@@ -17,6 +18,7 @@ class Printer {
     stdin.lineMode = false;
     stdin.echoMode = false;
     _filters.add(EnvFilter(_filters));
+    _filters.add(NormalFilter());
     _filters.add(FlutterBuildFilter());
     _filters.add(AnyErrorFilter());
     _filters.add(ExcludeFilter());
@@ -48,7 +50,9 @@ class Printer {
     // 127 删除
     // 27 ESC
     final keys = [10, 13, 27, 127];
+    // _sub = stdin.transform(utf8.decoder).listen((event) {
     _sub = keystrokes.listen((event) {
+      stdout.writeln('lockInput: $lockInput, isBuilding: $isBuilding, accessCmd: $accessCmd');
       if (lockInput || isBuilding || !accessCmd) {
         return;
       }
@@ -102,6 +106,10 @@ class Printer {
   }
 
   void print(String message) {
+    message.split('\n').where((e) => e.isNotEmpty).forEach(_print);
+  }
+
+  void _print(String message) {
     logSink?.writeln(message);
     for (final filter in _filters) {
       if (!filter.isFilter(message)) {
@@ -121,9 +129,9 @@ class Printer {
     if (_command != null) {
       _deleteAll();
     }
-    stdout.write(message);
+    stdout.writeln(message);
     if (_command != null) {
-      stdout.write(_command!.cache);
+      stdout.writeln(_command!.cache);
     }
   }
 

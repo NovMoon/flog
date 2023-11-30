@@ -6,7 +6,7 @@ import 'package:frun/print_filters/processor/multi_device.dart';
 import 'package:frun/print_filters/processor/redeclaration.dart';
 import 'package:frun/printer.dart';
 
-const String _loseConnect = 'Lost connection';
+const String _loseConnect = 'Lost connection to device';
 const String _built = '✓  Built build';
 const String _building = 'Running Gradle';
 const String _buildFailed = 'BUILD FAILED in';

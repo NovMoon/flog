@@ -93,8 +93,9 @@ class FlutterRunner {
       return false;
     }
     _mainProcess?.stdin.write(input);
-    stdout.write(input);
+
     stdout.write('\n');
+    stdout.write('执行命令：$input\n');
 
     if (input == 'q') {
       stop();
