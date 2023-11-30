@@ -7,7 +7,7 @@ class NormalFilter extends Filter {
   @override
   String? filter(String message) {
     message = message.replaceAll(regex, '');
-    return message.removeColor().cRed();
+    return message.removeColor();
   }
 
   @override
