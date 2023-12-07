@@ -10,10 +10,14 @@ class MultiDeviceProcessor extends BuildProcessor {
   bool isTarget = false;
 
   @override
-  Future<List<String>?> doBiz(String message) async {
-    var list = message.split('\n');
+  Future<List<String>?> doBiz() async {
+    var list = <String>[];
+    for (var message in messages) {
+      list.addAll(message.split('\n'));
+    }
     list = list.where((element) => element.trim().isNotEmpty).toList();
     list.mapIndex((e, i) => '(${i + 1}) $e').forEach(stdout.writeln);
+
 
     stdout.write('请选择设备：');
     final choice = await promptForCharInput(list.mapIndex((e, i) => '${i + 1}').toList());
@@ -25,15 +29,15 @@ class MultiDeviceProcessor extends BuildProcessor {
 
     stdout.writeln('');
 
-    message = list[index - 1];
+    var cmdMsg = list[index - 1];
 
-    var pos = message.indexOf('•');
-    message = message.substring(pos + 2);
+    var pos = cmdMsg.indexOf('•');
+    cmdMsg = cmdMsg.substring(pos + 2);
 
-    pos = message.indexOf(' ');
-    message = message.substring(0, pos);
+    pos = cmdMsg.indexOf(' ');
+    cmdMsg = cmdMsg.substring(0, pos);
 
-    return ['-d', message];
+    return ['-d', cmdMsg];
   }
 
   @override

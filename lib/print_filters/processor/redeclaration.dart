@@ -9,7 +9,7 @@ const String _key = 'e: ';
 class RedeclarationProcessor extends BuildProcessor {
 
   @override
-  Future<List<String>?> doBiz(String message) async {
+  Future<List<String>?> doBiz() async {
     stdout.writeln('RedeclarationProcessor: doBiz');
 
     final buildDir = Directory.current.child('build').asDir;
@@ -18,7 +18,7 @@ class RedeclarationProcessor extends BuildProcessor {
       return null;
     }
 
-    var list = message.split('\n');
+    var list = messages[0].split('\n');
     list = list.where((element) => element.trim().isNotEmpty).toList();
     list.forEach(toastErr);
 

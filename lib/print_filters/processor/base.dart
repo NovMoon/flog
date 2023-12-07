@@ -11,7 +11,10 @@ abstract class BuildProcessor {
 
   bool isProcess(String message);
 
+  List<String> messages = [];
+
   Future<void> onProcess(String message) async {
+    messages.add(message);
     if(isBizDoing) {
       return;
     }
@@ -19,7 +22,9 @@ abstract class BuildProcessor {
     isBizDoing = true;
     stdout.writeln('');
 
-    final cmd = await doBiz(message);
+    await Future.delayed(Duration(seconds: 3));
+
+    final cmd = await doBiz();
     if(cmd == null) {
       onRecycle();
       return;
@@ -33,7 +38,7 @@ abstract class BuildProcessor {
 
   /// 如果返回null，表示不能处理，直接结束
   /// 否则返回需要追加的命令参数，如果命令参数为空，则按原命令执行
-  Future<List<String>?> doBiz(String message);
+  Future<List<String>?> doBiz();
 
   void onRecycle() {
     isBizDoing = false;

@@ -50,9 +50,7 @@ class Printer {
     // 127 删除
     // 27 ESC
     final keys = [10, 13, 27, 127];
-    // _sub = stdin.transform(utf8.decoder).listen((event) {
     _sub = keystrokes.listen((event) {
-      stdout.writeln('lockInput: $lockInput, isBuilding: $isBuilding, accessCmd: $accessCmd');
       if (lockInput || isBuilding || !accessCmd) {
         return;
       }
